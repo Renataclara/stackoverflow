@@ -25,6 +25,7 @@ router.delete('/:id/answer/:ida', userController.deleteAnswer);//
 router.put('/:id/answer/:ida', userController.updateAnswer);//
 router.post('/:id/answer', userController.addAnswer);//
 router.post('/:id/vote', userController.vote);//
+router.post('/:id/answer/:ida/vote', userController.answervote);//
 router.get('/:idu',userController.findAll); //checked
 router.get('/:idu/:id', userController.findOne); //checked
 

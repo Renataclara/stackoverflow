@@ -1,6 +1,6 @@
 'use strict'
 
-const Task = require('../models/Question')
+const Question = require('../models/Question')
 const ObjectId = require('mongodb').ObjectId;
 var jwt = require('jsonwebtoken');
 const generate = require('../helpers/generateSecret');
@@ -11,7 +11,7 @@ const crypto = require('crypto');
 module.exports = {
   findAll: function (req,res) {
       if (req.headers.id == req.params.idu) {
-        Task.find({
+        Question.find({
           userid: req.headers.id
         })
         .populate([{
@@ -25,6 +25,11 @@ module.exports = {
           select: 'name _id'
         },
         {
+          path: 'answers.votes.uservoteid',
+          model: 'User',
+          select: 'name _id'
+        },
+        {
           path: 'votes'
         },
         {
@@ -33,6 +38,7 @@ module.exports = {
           select: 'name _id'
         }
       ])
+      .populate('answer.votes', 'uservoteid uservalue')
         .then(function (data) {
           res.send(data);
         })
@@ -41,7 +47,7 @@ module.exports = {
       }
   },
   create: function (req,res) {
-        Task.create({
+        Question.create({
           title: req.body.title,
           tags: req.body.tags,
           body: req.body.body,
@@ -53,7 +59,7 @@ module.exports = {
   },
   findOne: function (req,res) {
       // if (req.headers.id == req.params.idu) {
-          Task.find({
+          Question.find({
             _id: req.params.id
           })
           .then(function (data) {
@@ -65,7 +71,7 @@ module.exports = {
   },
   destroy: function (req,res) {
     if (req.headers.id == req.params.idu) {
-        Task.deleteOne({_id:req.params.id})
+        Question.deleteOne({_id:req.params.id})
         .then(function () {
           res.send('question is destroyed');
         })
@@ -75,7 +81,7 @@ module.exports = {
   },
   update: function (req,res) {
     if (req.headers.id == req.params.idu) {
-          Task.where({
+          Question.where({
             _id: req.params.id
           })
           .update({
@@ -91,7 +97,7 @@ module.exports = {
   },
   addTag: function (req,res) {
     if (req.headers.id == req.params.idu) {
-          Task.where({
+          Question.where({
             _id: req.params.id
           })
           .update({
@@ -108,7 +114,7 @@ module.exports = {
   },
   removeTag: function (req,res) {
       if (req.headers.id == req.params.idu) {
-          Task.where({
+          Question.where({
             _id: req.params.id
           })
           .update({
@@ -123,7 +129,7 @@ module.exports = {
   },
   addAnswer: function (req,res) {
 
-          Task.where({
+          Question.where({
             _id: req.params.id
           })
           .update({
@@ -141,7 +147,7 @@ module.exports = {
   },
   deleteAnswer: function (req,res) {
 
-          Task.updateOne({_id: req.params.id},
+          Question.updateOne({_id: req.params.id},
           {
             $pull:{
               answers: {
@@ -155,7 +161,7 @@ module.exports = {
 
   },
   updateAnswer: function (req,res) {
-    Task.updateOne({
+    Question.updateOne({
       _id: req.params.id,
       'answers._id': req.params.ida
     },
@@ -169,14 +175,14 @@ module.exports = {
     })
   },
   vote: function (req,res) {
-    Task.findOne({
+    Question.findOne({
       _id: req.params.id,
       'votes.uservoteid': req.headers.id
     })
     .then(function (data) {
       console.log(data);
       if (data == null) {
-        Task.updateOne({
+        Question.updateOne({
           _id: req.params.id
         },
         {
@@ -191,7 +197,7 @@ module.exports = {
           res.send(data);
         })
       } else {
-        Task.updateOne({_id: req.params.id},
+        Question.updateOne({_id: req.params.id},
         {
           $pull:{
             votes: {
@@ -203,6 +209,89 @@ module.exports = {
           res.send(data);
         })
       }
+    })
+  },
+  answervote: function (req,res) {
+    Question.findOne({
+      _id: req.params.id
+    })
+    .then(function (data) {
+      console.log('this is the grand data', data);
+        console.log('this is the grand data asnwer', data.answers);
+      // console.log('ini datanyaaa', data.answers[0].votes);
+      // console.log('-------------------------------------');
+      function theone(element) {
+        return element._id = req.params.ida
+      }
+      var answerIdx = data.answers.findIndex(theone)
+
+      function thenext(element) {
+        return element.uservoteid = req.headers.id
+      }
+      var voteIdx = data.answers[answerIdx].votes.findIndex(thenext)
+      console.log('this is voteIdx', voteIdx);
+
+      if (voteIdx == -1) {
+        data.answers[answerIdx].votes.push(
+          {
+            uservoteid: req.headers.id,
+            uservalue: req.body.value
+          }
+        )
+        const updatedQuestion = new Question(data)
+
+        updatedQuestion.save((err, inserted) => {
+          res.send(inserted);
+        })
+      } else {
+        if (voteIdx >= 0) {
+          data.answers[answerIdx].votes.splice( voteIdx, 1 );
+        }
+        const updatedQuestion = new Question(data)
+
+        updatedQuestion.save((err, inserted) => {
+          res.send(inserted);
+        })
+      }
+
+
+
+
+      // }
+      //         console.log('the result', data.answers[0].votes);
+
+      // if (data == null) {
+      //   Question.updateOne({
+      //     _id: req.params.id,
+      //     'answers._id': req.params.ida
+      //   },
+      //   {
+      //     $push:{
+      //       votes: {
+      //         uservoteid: req.headers.id,
+      //         uservalue: req.body.value
+      //       }
+      //     }
+      //   })
+      //   .then(function (data) {
+      //     res.send(data);
+      //   })
+      // } else {
+      //   Question.updateOne({
+      //     _id: req.params.id,
+      //     'answers._id': req.params.ida
+      //   },
+      //   {
+      //     $pull:{
+      //       votes: {
+      //         uservoteid: req.headers.id
+      //       }
+      //     }
+      //   })
+      //   .then(function (data) {
+      //     res.send(data);
+      //   })
+      // }
     })
   }
 }
