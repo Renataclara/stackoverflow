@@ -7,26 +7,30 @@ var userController = require('../controllers/questionController');
 require('dotenv').config()
 var jwt = require('jsonwebtoken');
 
+function middleware (req,res,next) {
+  console.log(req.headers);
+  if (req.headers.hasOwnProperty('token')) {
+    jwt.verify(req.headers.token, process.env.TOKEN_SECRET_KEY, function(err, decoded) {
+      if (decoded.username != null) {
+        req.headers.verifiedUser = decoded
+        next()
+      } else {
+        res.send('you need to sign up')
+      }
+    })
+  } else {
+    res.send('lu gaboleh post')
+  }
+}
 
-// router.use(function (req,res,next) {
-//   if (req.headers.hasOwnProperty('token')) {
-//     jwt.verify(req.headers.token, process.env.TOKEN_SECRET_KEY, function(err, decoded) {
-//       if (decoded.username != null) {
-//         next()
-//       } else {
-//         res.send('you need to sign up')
-//       }
-//     })
-//   }
-// })
 
-router.post('/', userController.create);//checked
+router.post('/', middleware, userController.create);//checked
 router.delete('/:id/answer/:ida', userController.deleteAnswer);//
 router.put('/:id/answer/:ida', userController.updateAnswer);//
 router.post('/:id/answer', userController.addAnswer);//
 router.post('/:id/vote', userController.vote);//
 router.post('/:id/answer/:ida/vote', userController.answervote);//
-router.get('/:idu',userController.findAll); //checked
+router.get('/',userController.findAll); //checked
 router.get('/:idu/:id', userController.findOne); //checked
 
 router.put('/:idu/:id', userController.update); //checked

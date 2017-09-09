@@ -10,10 +10,11 @@ const crypto = require('crypto');
 
 module.exports = {
   findAll: function (req,res) {
-      if (req.headers.id == req.params.idu) {
-        Question.find({
-          userid: req.headers.id
-        })
+      // if (req.headers.id == req.params.idu) {
+        // Question.find({
+        //   userid: req.headers.id
+        // })
+        Question.find()
         .populate([{
           path: 'userid',
           model: 'User',
@@ -42,16 +43,17 @@ module.exports = {
         .then(function (data) {
           res.send(data);
         })
-      } else {
-        res.send('yours only');
-      }
+      // } else {
+      //   res.send('yours only');
+      // }
   },
   create: function (req,res) {
+    console.log(req.headers);
         Question.create({
           title: req.body.title,
           tags: req.body.tags,
           body: req.body.body,
-          userid: req.headers.id
+          userid: req.headers.verifiedUser.id
         })
         .then(function(result) {
           res.send(result);

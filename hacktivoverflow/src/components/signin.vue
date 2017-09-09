@@ -1,10 +1,6 @@
 <template>
   <div>
-    <form @submit='getSignup'>
-      <div class="form-group">
-        <label for="signupName">Name</label>
-        <input v-model='name' class="form-control" id="signupName" placeholder="Your name">
-      </div>
+    <form @submit='getSignin'>
       <div class="form-group">
         <label for="signupEmail">Email address</label>
         <input v-model='username' type="email" class="form-control" id="signupEmail" aria-describedby="emailHelp" placeholder="Enter email">
@@ -25,12 +21,11 @@ export default {
   data () {
     return {
       username: null,
-      name: null,
       password: null
     }
   },
   methods: {
-    getSignup (e) {
+    getSignin (e) {
       e.preventDefault()
       console.log('halo sblm axios')
       this.$http.post('/signin', {
@@ -38,9 +33,12 @@ export default {
         password: this.password
       })
       .then((data) => {
-        this.signup = data.data
-        console.log('signup data', this.signup)
-        this.$router.push({path: '/signin'}) // push to history
+        this.signin = data.data
+        console.log('signin data', this.signin)
+        localStorage.setItem('token', this.signin.token)
+        localStorage.setItem('id', this.signin.id)
+        localStorage.setItem('name', this.signin.name)
+        this.$router.push({path: '/home'}) // push to history
       })
       .catch((error) => {
         console.log(error)

@@ -1,20 +1,30 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import axios from 'axios'
 
 Vue.use(Vuex)
 
 const store = new Vuex.Store({
   state: {
-    // count: 0
-
+    mainlist: []
   },
   mutations: {
-    // increment (state) {}
+    masterlist (state, payload) {
+      state.mainlist = payload
+      console.log('this is mainlist at store', state.mainlist)
+    }
   },
   actions: {
-    // nambahDua ({commit, state}, payload) {
-    //   commit('incrementdua', newCount)
-    // }
+    getQuestions ({ commit }, payload) {
+      axios.get('http://localhost:3000/questions')
+        .then(function (response) {
+          console.log('this is the data', response.data)
+          commit('masterlist', response.data)
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+    }
   }
 
 })

@@ -1,12 +1,11 @@
 'use strict'
-
+require('dotenv').config()
 const User = require('../models/User')
 const ObjectId = require('mongodb').ObjectId;
 var jwt = require('jsonwebtoken');
 const generate = require('../helpers/generateSecret');
 const hash = require('../helpers/hash');
 const crypto = require('crypto');
-
 
 module.exports = {
   findAll: function (req,res) {
