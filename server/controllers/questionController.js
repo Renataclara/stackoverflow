@@ -64,6 +64,31 @@ module.exports = {
           Question.find({
             _id: req.params.id
           })
+          .populate([{
+            path: 'userid',
+            model: 'User',
+            select: 'name _id'
+          },
+          {
+            path: 'answers.userid',
+            model: 'User',
+            select: 'name _id'
+          },
+          {
+            path: 'answers.votes.uservoteid',
+            model: 'User',
+            select: 'name _id'
+          },
+          {
+            path: 'votes'
+          },
+          {
+            path: 'votes.uservoteid',
+            model: 'User',
+            select: 'name _id'
+          }
+        ])
+        .populate('answer.votes', 'uservoteid uservalue')
           .then(function (data) {
             res.send(data);
           })
@@ -72,30 +97,31 @@ module.exports = {
       // }
   },
   destroy: function (req,res) {
-    if (req.headers.id == req.params.idu) {
+    // if (req.headers.id == req.params.idu) {
         Question.deleteOne({_id:req.params.id})
-        .then(function () {
-          res.send('question is destroyed');
+        .then(function (data) {
+          res.send(data);
         })
-      } else {
-        res.send('yours only');
-      }
+      // } else {
+      //   res.send('yours only');
+      // }
   },
   update: function (req,res) {
-    if (req.headers.id == req.params.idu) {
+    // if (req.headers.id == req.params.idu) {
           Question.where({
             _id: req.params.id
           })
           .update({
             title: req.body.title,
-            body: req.body.body
+            body: req.body.body,
+            tags: req.body.tags
           })
           .then(function (data) {
             res.send(data);
           })
-      } else {
-        res.send('yours only');
-      }
+      // } else {
+      //   res.send('yours only');
+      // }
   },
   addTag: function (req,res) {
     if (req.headers.id == req.params.idu) {
@@ -137,7 +163,7 @@ module.exports = {
           .update({
             $push:{
               answers: {
-                userid: req.headers.id,
+                userid: req.headers.verifiedUser.id,
                 body: req.body.body
               }
             }
@@ -179,7 +205,7 @@ module.exports = {
   vote: function (req,res) {
     Question.findOne({
       _id: req.params.id,
-      'votes.uservoteid': req.headers.id
+      'votes.uservoteid': req.headers.verifiedUser.id
     })
     .then(function (data) {
       console.log(data);
@@ -190,7 +216,7 @@ module.exports = {
         {
           $push:{
             votes: {
-              uservoteid: req.headers.id,
+              uservoteid: req.headers.verifiedUser.id,
               uservalue: req.body.value
             }
           }
@@ -203,7 +229,7 @@ module.exports = {
         {
           $pull:{
             votes: {
-              uservoteid: req.headers.id
+              uservoteid: req.headers.verifiedUser.id
             }
           }
         })
@@ -228,7 +254,7 @@ module.exports = {
       var answerIdx = data.answers.findIndex(theone)
 
       function thenext(element) {
-        return element.uservoteid = req.headers.id
+        return element.uservoteid = req.headers.verifiedUser.id
       }
       var voteIdx = data.answers[answerIdx].votes.findIndex(thenext)
       console.log('this is voteIdx', voteIdx);
@@ -236,7 +262,7 @@ module.exports = {
       if (voteIdx == -1) {
         data.answers[answerIdx].votes.push(
           {
-            uservoteid: req.headers.id,
+            uservoteid: req.headers.verifiedUser.id,
             uservalue: req.body.value
           }
         )
@@ -255,45 +281,6 @@ module.exports = {
           res.send(inserted);
         })
       }
-
-
-
-
-      // }
-      //         console.log('the result', data.answers[0].votes);
-
-      // if (data == null) {
-      //   Question.updateOne({
-      //     _id: req.params.id,
-      //     'answers._id': req.params.ida
-      //   },
-      //   {
-      //     $push:{
-      //       votes: {
-      //         uservoteid: req.headers.id,
-      //         uservalue: req.body.value
-      //       }
-      //     }
-      //   })
-      //   .then(function (data) {
-      //     res.send(data);
-      //   })
-      // } else {
-      //   Question.updateOne({
-      //     _id: req.params.id,
-      //     'answers._id': req.params.ida
-      //   },
-      //   {
-      //     $pull:{
-      //       votes: {
-      //         uservoteid: req.headers.id
-      //       }
-      //     }
-      //   })
-      //   .then(function (data) {
-      //     res.send(data);
-      //   })
-      // }
     })
   }
 }

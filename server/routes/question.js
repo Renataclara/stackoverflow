@@ -26,14 +26,15 @@ function middleware (req,res,next) {
 
 router.post('/', middleware, userController.create);//checked
 router.delete('/:id/answer/:ida', userController.deleteAnswer);//
+router.delete('/:id', userController.destroy);//
 router.put('/:id/answer/:ida', userController.updateAnswer);//
-router.post('/:id/answer', userController.addAnswer);//
-router.post('/:id/vote', userController.vote);//
-router.post('/:id/answer/:ida/vote', userController.answervote);//
+router.post('/:id/answer', middleware, userController.addAnswer);//
+router.post('/:id/vote', middleware, userController.vote);//
+router.post('/:id/answer/:ida/vote', middleware, userController.answervote);//
 router.get('/',userController.findAll); //checked
-router.get('/:idu/:id', userController.findOne); //checked
+router.get('/:id', userController.findOne); //checked
 
-router.put('/:idu/:id', userController.update); //checked
+router.put('/:id', middleware, userController.update); //checked
 
 router.put('/:idu/:id/tags', userController.addTag); //checked
 router.put('/:idu/:id/removetags', userController.removeTag); //checked

@@ -4,13 +4,12 @@
     <div class="container">
       <div class="row">
          <div class="col-sm-8">
-           <Addquestion></Addquestion>
-           <Mainlist></Mainlist>
+           <router-view></router-view>
          </div>
          <div class="col-sm-4">
            <div class="container">
              <div class="row">
-               lol
+               <span class="oi oi-icon-name" title="icon name" aria-hidden="true"></span>
              </div>
            </div>
            <div class="container">
@@ -26,13 +25,10 @@
 
 <script>
 import Navbar from '@/components/navbar'
-import Mainlist from '@/components/mainlist'
-import Addquestion from '@/components/addquestion'
+
 export default {
   components: {
-    Navbar,
-    Mainlist,
-    Addquestion
+    Navbar
   },
   data () {
     return {
