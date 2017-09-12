@@ -7,7 +7,8 @@ Vue.use(Vuex)
 const store = new Vuex.Store({
   state: {
     mainlist: [],
-    userid: localStorage.getItem('id')
+    userid: localStorage.getItem('id'),
+    name: localStorage.getItem('name')
   },
   getters: {
     sortbylatest: state => {
@@ -15,9 +16,36 @@ const store = new Vuex.Store({
         return new Date(a.created_at) - new Date(b.created_at)
       })
       return result
+    },
+    nets: state => {
+      var listNet = []
+      state.mainlist.forEach(q => {
+        if (q.votes.length > 0) {
+          var net = 0
+          q.votes.forEach(v => {
+            net += v.uservalue
+          })
+          console.log(net, 'the ones not 0')
+          listNet.push(net)
+        } else {
+          listNet.push(0)
+        }
+      })
+      return listNet
     }
   },
   mutations: {
+    logout (state) {
+      state.userid = ''
+      state.name = ''
+      localStorage.removeItem('name')
+      localStorage.removeItem('token')
+      localStorage.removeItem('id')
+    },
+    login (state) {
+      state.userid = localStorage.getItem('id')
+      state.name = localStorage.getItem('name')
+    },
     masterlist (state, payload) {
       state.mainlist = payload
       console.log('this is mainlist at store', state.mainlist)
@@ -33,12 +61,14 @@ const store = new Vuex.Store({
       const idxvt = state.mainlist.findIndex((list) => (list._id === payload.id))
       console.log('the index of the voted', idxvt)
       console.log('the index of the voted isinya', state.mainlist[idxvt].votes)
-      const idxvted = state.mainlist[idxvt].votes.findIndex((vote) => (vote.uservoteid === userid))
+      const idxvted = state.mainlist[idxvt].votes.findIndex((vote) => (vote.uservoteid._id === userid))
       if (idxvted === -1) {
         console.log('not exist, make new one')
         state.mainlist[idxvt].votes.push({
           uservalue: payload.value,
-          uservoteid: localStorage.getItem('id')
+          uservoteid: {
+            _id: localStorage.getItem('id')
+          }
         })
         console.log(state.mainlist[idxvt].votes)
       } else {
@@ -79,7 +109,7 @@ const store = new Vuex.Store({
           console.log(error)
         })
     },
-    submitQuestion ({ commit }, payload) {
+    submitQuestion ({ commit, state }, payload) {
       console.log('halo sblm axios')
       console.log('this is the payload to submit new question in store', payload)
       axios.post('http://localhost:3000/questions', payload, {
@@ -88,7 +118,11 @@ const store = new Vuex.Store({
         }
       })
       .then((data) => {
-        console.log(data.data)
+        console.log('this is the one !!!Q##@', data.data)
+        data.data.userid = {
+          _id: state.userid,
+          name: state.name
+        }
         commit('saveQuestion', data.data)
       })
       .catch((error) => {
@@ -103,6 +137,7 @@ const store = new Vuex.Store({
         }
       })
       .then((data) => {
+        console.log('hasil delete', data)
         commit('deleteQuestion', questionid)
       })
       .catch((error) => {

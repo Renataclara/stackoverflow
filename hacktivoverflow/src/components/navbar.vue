@@ -9,13 +9,16 @@
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
           <li class="nav-item active">
-            <router-link class="nav-link" to="/home">Home</router-link>
+            <router-link class="nav-link" to="/">Home</router-link>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#">My Questions</a>
+            <router-link class="nav-link" to="/signin">Sign in</router-link>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#">Log out</a>
+            <router-link class="nav-link" to="/signup">Join Us</router-link>
+          </li>
+          <li v-if='userid !== null' class="nav-item" @click='logout'>
+            <router-link class="nav-link" to="/signin">Logout</router-link>
           </li>
         </ul>
         <form class="form-inline my-2 my-lg-0">
@@ -29,7 +32,18 @@
 </template>
 
 <script>
+import { mapMutations, mapState } from 'vuex'
+
 export default {
+  methods: {
+    ...mapMutations([
+      'logout'
+    ])
+  },
+  computed: mapState([
+    'userid',
+    'name'
+  ])
 }
 </script>
 

@@ -27,7 +27,7 @@ function middleware (req,res,next) {
 router.post('/', middleware, userController.create);//checked
 router.delete('/:id/answer/:ida', userController.deleteAnswer);//
 router.delete('/:id', userController.destroy);//
-router.put('/:id/answer/:ida', userController.updateAnswer);//
+// router.put('/:id/answer/:ida', userController.updateAnswer);//
 router.post('/:id/answer', middleware, userController.addAnswer);//
 router.post('/:id/vote', middleware, userController.vote);//
 router.post('/:id/answer/:ida/vote', middleware, userController.answervote);//

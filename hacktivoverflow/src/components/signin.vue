@@ -11,13 +11,15 @@
         <input v-model='password' type="password" class="form-control" id="signupPassword" placeholder="Password">
       </div>
       <button type="submit" class="btn btn-primary">Submit</button>
+      <router-link class="nav-link" to="/signup">Don't have an account yet? Sign up now</router-link>
     </form>
   </div>
 </template>
 
 <script>
+import { mapMutations } from 'vuex'
+
 export default {
-  // props: ['perarticle'],
   data () {
     return {
       username: null,
@@ -38,12 +40,16 @@ export default {
         localStorage.setItem('token', this.signin.token)
         localStorage.setItem('id', this.signin.id)
         localStorage.setItem('name', this.signin.name)
-        this.$router.push({path: '/home'}) // push to history
+        this.$router.push({path: '/'}) // push to history
+        this.login()
       })
       .catch((error) => {
         console.log(error)
       })
-    }
+    },
+    ...mapMutations([
+      'login'
+    ])
   }
 }
 </script>

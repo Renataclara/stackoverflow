@@ -22,7 +22,7 @@ export default new Router({
       component: signin
     },
     {
-      path: '/home',
+      path: '/',
       component: home,
       children: [
         {

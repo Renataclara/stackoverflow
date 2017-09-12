@@ -173,6 +173,21 @@ module.exports = {
               'answers.userid': req.headers.verifiedUser.id,
               'answers.body': req.body.body
             })
+            .populate([{
+              path: 'userid',
+              model: 'User',
+              select: 'name _id'
+            },
+            {
+              path: 'answers.userid',
+              model: 'User',
+              select: 'name _id'
+            },
+            {
+              path: 'answers.votes.uservoteid',
+              model: 'User',
+              select: 'name _id'
+            }])
             .then(function (data) {
               res.send(data)
             })

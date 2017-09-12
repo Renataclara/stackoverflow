@@ -1,27 +1,32 @@
 <template>
   <div>
-    <div class="list-group" v-for='list in lists'>
-      <router-link :to="`/home/${list._id}`" class="list-group-item list-group-item-info flex-column align-items-start">
+    <div class="list-group" v-for='(list, index) in lists'>
+      <div class="list-group-item list-group-item-info flex-column align-items-start">
         <div class="d-flex w-100 justify-content-between">
            <h4 class="mb-1">{{list.title}}</h4>
            <small>{{list.created_at}}</small>
          </div>
          <p class="mb-1">{{list.body}}</p>
-         <small>Votes: {{list.votes.value}} |  by {{list.userid.name}}</small>
-      </router-link>
+         <small> by {{list.userid.name}}</small>
+         <button v-if="userid === list.userid._id || userid === list.userid" type="button" @click="deleteQuestion(`${list._id}`)" class="btn btn-outline-danger btn-sm">X</button>
+         <button type="button" @click="vote({id:`${list._id}`, value: 1 })" class="btn btn-outline-dark btn-sm">+</button>
+         <small v-if='list.votes.length === 0'>votes: 0 </small>
+         <small v-if='list.votes.length !== 0'>votes: {{nets}} </small>
+         <button type="button" @click="vote({id:`${list._id}`, value: -1 })" class="btn btn-outline-dark btn-sm">-</button>
+      </div>
     </div>
     <div class="list-group" v-for='(answer, index) in answers'>
       <div class="list-group-item list-group-item-action flex-column align-items-start">
         <div class="d-flex w-100 justify-content-between">
            <p class="mb-1">{{answer.body}}</p>
            <small>{{answer.created_at}}</small>
-            <button v-if="userid === answer.userid._id" type="button" @click="deleteAnswer(`${answer._id}`)" class="btn btn-outline-danger btn-sm">X</button>
+            <button v-if="userid === answer.userid._id || userid === answer.userid" type="button" @click="deleteAnswer(`${answer._id}`)" class="btn btn-outline-danger btn-sm">X</button>
          </div>
          <small>by {{answer.userid.name}}</small>
-         <button type="button" @click="vote({id:`${answer._id}`, value: 1 })" class="btn btn-outline-dark btn-sm">+</button>
+         <button type="button" @click="voteans({id:`${answer._id}`, value: 1 })" class="btn btn-outline-dark btn-sm">+</button>
          <small v-if='answer.votes.length === 0'>votes: 0 </small>
-         <small v-if='answer.votes.length !== 0'>votes: {{nets[index]}}</small>
-         <button type="button" @click="vote({id:`${answer._id}`, value: -1 })" class="btn btn-outline-dark btn-sm">-</button>
+         <small v-if='answer.votes.length !== 0'>votes: {{netsans[index]}}</small>
+         <button type="button" @click="voteans({id:`${answer._id}`, value: -1 })" class="btn btn-outline-dark btn-sm">-</button>
       </div>
     </div>
     <div class="list-group">
@@ -42,6 +47,7 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex'
 export default {
   props: ['id'],
   data () {
@@ -52,6 +58,10 @@ export default {
     }
   },
   methods: {
+    ...mapActions([
+      'deleteQuestion',
+      'vote'
+    ]),
     getQuestions () {
       this.$http.get(`questions/${this.id}`)
       // axios.get('http://localhost:3000')
@@ -77,7 +87,12 @@ export default {
       })
       .then((data) => {
         // console.log(data.data, 'ini hasil axios post answer')
+        data.data.userid = {
+          _id: localStorage.getItem('id'),
+          name: localStorage.getItem('name')
+        }
         this.answers = data.data.answers
+
         // console.log(this.answers, 'the answers')
       })
       .catch((error) => {
@@ -94,6 +109,7 @@ export default {
       })
       .then((data) => {
         // console.log(data.data)
+        console.log('hasil delete answer', data)
         const filteredAnswer = this.answers.filter((list) => list._id !== ida)
         // console.log('the filtered answers', filteredAnswer)
         this.answers = filteredAnswer
@@ -102,7 +118,7 @@ export default {
         console.log(error)
       })
     },
-    vote (payload) {
+    voteans (payload) {
       // console.log('halo sblm axios')
       // console.log('ini id question lol', this.id)
       // console.log('ini id answer lol', payload.id)
@@ -154,6 +170,15 @@ export default {
       return localStorage.getItem('id')
     },
     nets () {
+      console.log(this.$store.state.mainlist[0], 'from mainlist id')
+      console.log(this.id, 'from id from data')
+      if (this.$store.state.mainlist.length > 0) {
+        var idx = this.$store.state.mainlist.findIndex((question) => (question._id === this.id))
+        console.log('the index of the question for nets', idx)
+        return this.$store.getters.nets[idx]
+      }
+    },
+    netsans () {
       var listNet = []
       this.answers.forEach(q => {
         if (q.votes.length > 0) {

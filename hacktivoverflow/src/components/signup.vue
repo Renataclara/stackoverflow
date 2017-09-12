@@ -15,6 +15,7 @@
         <input v-model='password' type="password" class="form-control" id="signupPassword" placeholder="Password">
       </div>
       <button type="submit" class="btn btn-primary">Submit</button>
+      <router-link class="nav-link" to="/signin">Already own an account? Sign in here</router-link>
     </form>
   </div>
 </template>

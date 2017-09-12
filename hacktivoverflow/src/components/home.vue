@@ -14,7 +14,7 @@
            </div>
            <div class="container">
              <div class="row">
-               lol2
+               Semoga hari anda bersinar seperti mentari :D
              </div>
            </div>
          </div>
