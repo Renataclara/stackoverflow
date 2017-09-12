@@ -156,7 +156,6 @@ module.exports = {
       }
   },
   addAnswer: function (req,res) {
-
           Question.where({
             _id: req.params.id
           })
@@ -169,9 +168,15 @@ module.exports = {
             }
           })
           .then(function (data) {
-            res.send(data);
+            Question.findOne({
+              _id: req.params.id,
+              'answers.userid': req.headers.verifiedUser.id,
+              'answers.body': req.body.body
+            })
+            .then(function (data) {
+              res.send(data)
+            })
           })
-
   },
   deleteAnswer: function (req,res) {
 
@@ -244,20 +249,22 @@ module.exports = {
       _id: req.params.id
     })
     .then(function (data) {
-      console.log('this is the grand data', data);
-        console.log('this is the grand data asnwer', data.answers);
-      // console.log('ini datanyaaa', data.answers[0].votes);
-      // console.log('-------------------------------------');
-      function theone(element) {
-        return element._id = req.params.ida
-      }
-      var answerIdx = data.answers.findIndex(theone)
-
-      function thenext(element) {
-        return element.uservoteid = req.headers.verifiedUser.id
-      }
-      var voteIdx = data.answers[answerIdx].votes.findIndex(thenext)
-      console.log('this is voteIdx', voteIdx);
+      // console.log('this is the grand data', data);
+      //   console.log('this is the grand data asnwer', data.answers);
+      // // console.log('ini datanyaaa', data.answers[0].votes);
+      // // console.log('-------------------------------------');
+      // console.log('from controller: ida', req.params.ida)
+      // if (data.answers[0]._id == req.params.ida) {
+      //   console.log('bener cuy');
+      // }
+      // const filteredAnswer = data.answers.filter((list) => list._id == req.params.ida)
+      // console.log('the filtered answers', filteredAnswer)
+      // const filteredVote = filteredAnswer[0].votes.filter((list) => list.uservoteid == req.headers.verifiedUser.id)
+      // console.log('the filtered vote', filteredVote)
+      var answerIdx = data.answers.findIndex((a) => (a._id == req.params.ida))
+      console.log('answer idx', answerIdx)
+      var voteIdx = data.answers[answerIdx].votes.findIndex((a) => (a.uservoteid == req.headers.verifiedUser.id))
+      console.log('this is voteIdx', voteIdx)
 
       if (voteIdx == -1) {
         data.answers[answerIdx].votes.push(
@@ -266,19 +273,23 @@ module.exports = {
             uservalue: req.body.value
           }
         )
-        const updatedQuestion = new Question(data)
-
-        updatedQuestion.save((err, inserted) => {
-          res.send(inserted);
+        console.log('aloha no');
+        data.save((err, inserted) => {
+          console.log('before save if there is no voteidx', inserted)
+          var result = {inserted: inserted, success: true}
+          console.log('after put success', result);
+          res.send(result);
         })
       } else {
-        if (voteIdx >= 0) {
-          data.answers[answerIdx].votes.splice( voteIdx, 1 );
-        }
-        const updatedQuestion = new Question(data)
-
-        updatedQuestion.save((err, inserted) => {
-          res.send(inserted);
+        // if (voteIdx >= 0) {
+        data.answers[answerIdx].votes.splice( voteIdx, 1 );
+        // }
+          console.log('aloha');
+        data.save((err, inserted) => {
+          console.log('before save if there is voteidx', inserted)
+          var result = {inserted: inserted, success: false}
+          console.log('after put fail', result);
+          res.send(result);
         })
       }
     })

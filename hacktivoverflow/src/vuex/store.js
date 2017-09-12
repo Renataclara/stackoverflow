@@ -6,7 +6,8 @@ Vue.use(Vuex)
 
 const store = new Vuex.Store({
   state: {
-    mainlist: []
+    mainlist: [],
+    userid: localStorage.getItem('id')
   },
   getters: {
     sortbylatest: state => {

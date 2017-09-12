@@ -1,22 +1,23 @@
 <template>
   <div>
     <Addquestion></Addquestion>
-    <div class="list-group" v-for='list in lists'>
+    <div class="list-group" v-for='(list, index) in lists'>
       <div class="list-group-item list-group-item-action flex-column align-items-start">
       <!-- <router-link :to="`/home/${list._id}`" class="list-group-item list-group-item-action flex-column align-items-start"> -->
+      <router-link :to="`/home/${list._id}`">
         <div class="d-flex w-100 justify-content-between">
            <h5 class="mb-1">{{list.title}}</h5>
            <small>{{list.created_at}}</small>
          </div>
+       </router-link>
          <small>by {{list.userid.name}}</small>
-
-         <button type="button" @click="deleteQuestion(`${list._id}`)" class="btn btn-outline-danger btn-sm">X</button>
+         <button v-if="userid === list.userid._id" type="button" @click="deleteQuestion(`${list._id}`)" class="btn btn-outline-danger btn-sm">X</button>
          <button type="button" @click="vote({id:`${list._id}`, value: 1 })" class="btn btn-outline-dark btn-sm">+</button>
          <small v-if='list.votes.length === 0'>votes: 0 </small>
-         <small v-if='list.votes.length !== 0'>votes: {{list.votes[0].uservalue}}</small>
+         <small v-if='list.votes.length !== 0'>votes: {{nets[index]}} </small>
          <button type="button" @click="vote({id:`${list._id}`, value: -1 })" class="btn btn-outline-dark btn-sm">-</button>
          <!-- Button trigger modal -->
-        <button type="button" @click="getQuestion(`${list._id}`)" class="btn btn-outline-success btn-sm" data-toggle="modal" data-target="#exampleModalLong">
+        <button v-if='userid === list.userid._id' type="button" @click="getQuestion(`${list._id}`)" class="btn btn-outline-success btn-sm" data-toggle="modal" data-target="#exampleModalLong">
           Edit
         </button>
 
@@ -59,7 +60,7 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex'
+import { mapActions, mapState } from 'vuex'
 import Addquestion from '@/components/addquestion'
 
 export default {
@@ -101,46 +102,31 @@ export default {
       .catch((error) => {
         console.log(error)
       })
-    },
-    // voteUp (id) {
-    //   console.log('halo sblm axios')
-    //   this.$http.post(`/questions/${id}/vote`, {
-    //     value: 1
-    //   }, {
-    //     headers: {
-    //       token: localStorage.getItem('token')
-    //     }
-    //   })
-    //   .then((data) => {
-    //     console.log('hasil upvote', data.data)
-    //     this.$router.push({path: '/home'}) // push to history
-    //   })
-    //   .catch((error) => {
-    //     console.log(error)
-    //   })
-    // },
-    voteDown (id) {
-      console.log('halo sblm axios')
-      this.$http.post(`/questions/${id}/vote`, {
-        value: -1
-      }, {
-        headers: {
-          token: localStorage.getItem('token')
-        }
-      })
-      .then((data) => {
-        console.log(data.data)
-        this.$router.push({path: '/home'}) // push to history
-      })
-      .catch((error) => {
-        console.log(error)
-      })
     }
   },
   computed: {
     lists () {
       return this.$store.state.mainlist
-    }
+    },
+    nets () {
+      var listNet = []
+      this.$store.state.mainlist.forEach(q => {
+        if (q.votes.length > 0) {
+          var net = 0
+          q.votes.forEach(v => {
+            net += v.uservalue
+          })
+          console.log(net, 'the ones not 0')
+          listNet.push(net)
+        } else {
+          listNet.push(0)
+        }
+      })
+      return listNet
+    },
+    ...mapState([
+      'userid'
+    ])
   },
   created () {
     this.getQuestions()
