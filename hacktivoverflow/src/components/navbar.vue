@@ -11,10 +11,10 @@
           <li class="nav-item active">
             <router-link class="nav-link" to="/">Home</router-link>
           </li>
-          <li class="nav-item">
+          <li v-if='userid == null' class="nav-item">
             <router-link class="nav-link" to="/signin">Sign in</router-link>
           </li>
-          <li class="nav-item">
+          <li v-if='userid == null' class="nav-item">
             <router-link class="nav-link" to="/signup">Join Us</router-link>
           </li>
           <li v-if='userid !== null' class="nav-item" @click='logout'>
